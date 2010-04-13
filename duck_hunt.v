@@ -18,7 +18,7 @@
 // Additional Comments: 
 //
 //////////////////////////////////////////////////////////////////////////////////
-module duck_hunt(clk_100mhz, rst, clk_25mhz, blank, comp_sync, hsync, vsync, pixel_r, pixel_g, pixel_b);
+module duck_hunt(clk_100mhz, rst, clk_25mhz, blank, comp_sync, hsync, vsync, pixel_r, pixel_g, pixel_b, sprite_vist, bgch);
 	 input clk_100mhz;
     input rst;
 	 output clk_25mhz;
@@ -26,6 +26,8 @@ module duck_hunt(clk_100mhz, rst, clk_25mhz, blank, comp_sync, hsync, vsync, pix
 	 output comp_sync;
     output hsync;
     output vsync;
+	 output sprite_vist;
+	 output bgch;
     output [7:0] pixel_r;
     output [7:0] pixel_g;
     output [7:0] pixel_b;
@@ -40,6 +42,8 @@ module duck_hunt(clk_100mhz, rst, clk_25mhz, blank, comp_sync, hsync, vsync, pix
     wire [3:0] interrupts;
 
 	 assign interrupts = 4'h0;
+	 assign sprite_vist = ~sprite_vis;
+	 assign bgch = ~bck_ch_active;
 
 vgamult vga(clk_100mhz, rst, clk_25mhz, blank, comp_sync, hsync, vsync, pixel_r, pixel_g, pixel_b, sprite_x, sprite_y, sprite_vis, 
 				sprite_pos, sprite_attr, sprite_sel, bck_ch_active, bck_sel, font_ch_active, font_data, font_addr, font_en);
