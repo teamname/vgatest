@@ -19,7 +19,7 @@
 //
 //////////////////////////////////////////////////////////////////////////////////
 module vgamult(clk_100mhz, rst, clk_25mhz, blank, comp_sync, hsync, vsync, pixel_r, pixel_g, pixel_b, x, y, visable, load_pos, load_att, sprite_sel, 
-							bchange_active, background_sel, fchange_active, fwdata, fwaddr, fwenable);
+							bchange_active, background_sel, fchange_active, fwdata, fwaddr, fwenable, clk_100mhz_buf);
     input clk_100mhz;
     input rst, visable, load_pos, load_att, bchange_active, fchange_active, fwenable;
 	 input [1:0] background_sel;
@@ -32,20 +32,21 @@ module vgamult(clk_100mhz, rst, clk_25mhz, blank, comp_sync, hsync, vsync, pixel
 	 output blank;
 	 output comp_sync;
     output hsync;
-    output vsync;
+    output vsync, clk_100mhz_buf;
     output [7:0] pixel_r;
     output [7:0] pixel_g;
     output [7:0] pixel_b;
 	   
 	 wire [8:0] pixel_x;
 	 wire [7:0] pixel_y;
-	 wire clkin_ibufg_out, clk_100mhz_buf, locked_dcm;
 	 
-	 //assign locked_dcm = 1'b1;
-	 //sim_clk_gen clk(clk_100mhz_buf, clk_25mhz);
+	 wire clkin_ibufg_out;
+	 wire clk_100mhz_buf;
+	 wire locked_dcm;
+	 
 	 vga_clk vga_clk_gen1(clk_100mhz, rst, clk_25mhz, clkin_ibufg_out, clk_100mhz_buf, locked_dcm);
-	 vga_logic  vgal1(.clk(clk_25mhz), .rst(rst | ~locked_dcm), .blank(blank), .comp_sync(comp_sync), .hsync(hsync), .vsync(vsync), .pixel_x(pixel_x), .pixel_y(pixel_y));
-	 main_logic main1(clk_100mhz_buf, rst | ~locked_dcm, pixel_x, pixel_y, pixel_r, pixel_g, pixel_b, x, y, visable, load_pos, load_att, sprite_sel, 
+	 vga_logic  vgal1(.clk(clk_25mhz), .rst(rst|~locked_dcm), .blank(blank), .comp_sync(comp_sync), .hsync(hsync), .vsync(vsync), .pixel_x(pixel_x), .pixel_y(pixel_y));
+	 main_logic main1(clk_100mhz_buf, rst|~locked_dcm, pixel_x, pixel_y, pixel_r, pixel_g, pixel_b, x, y, visable, load_pos, load_att, sprite_sel, 
 							bchange_active, background_sel, fchange_active, fwdata, fwaddr, fwenable);
 
 

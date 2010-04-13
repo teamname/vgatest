@@ -7,11 +7,11 @@
 // \   \   \/     Version : 10.1.03
 //  \   \         Application : xaw2verilog
 //  /   /         Filename : vga_clk.v
-// /___/   /\     Timestamp : 04/11/2010 16:34:20
+// /___/   /\     Timestamp : 03/14/2010 15:32:49
 // \   \  /  \ 
 //  \___\/\___\ 
 //
-//Command: xaw2verilog -intstyle D:/toplevel/vga_clk.xaw -st vga_clk.v
+//Command: xaw2verilog -intstyle D:/vga/vga_clk.xaw -st vga_clk.v
 //Design Name: vga_clk
 //Device: xc2vp30-6ff896
 //
