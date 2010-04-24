@@ -59,7 +59,7 @@ module mips(input         clk, reset,
   wire        activeexception; //exception
   wire rti;
   wire is_nop;
-  wire branch_stall_F, branch_stall_D, cnt_int_sel;
+  wire branch_stall_F, branch_stall_D, cnt_int_sel, cnt_int_disable;
   
    // controller
   controller cont(
@@ -84,7 +84,7 @@ module mips(input         clk, reset,
                  halfword_E,
                  hilodisableE,
                  hiloaccessD, md_start_E, hilosrcE, spriteE, fontE, backgroundE, posE, attrE, visiE, randomD, usezeroD, cnt_int, rti, audioD,
-                 branch_stall_F, branch_stall_D, gunD, ldgunD, cnt_int_sel);
+                 branch_stall_F, branch_stall_D, gunD, ldgunD, cnt_int_sel, cnt_int_disable);
 // data path
   datapath dp(
                 clk, reset, 
@@ -114,7 +114,7 @@ module mips(input         clk, reset,
                 font_ch_active, font_clr, font_en,
                 font_addr, font_data, bck,  cnt_int, rti, interrupts,
                 audioVol, audioSel, audioEn, audioD, is_nop, stall_mem, gunD, ldgunD,
-					 gun_data, controller_data, cnt_into, PCD, int_en1, cnt_int_sel);
+					 gun_data, controller_data, cnt_into, PCD, int_en1, cnt_int_sel, cnt_int_disable);
 
 endmodule
 

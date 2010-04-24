@@ -35,7 +35,7 @@ module controller(input        clk, reset,
                   output       hiloaccessD, mdstartE, hilosrcE, 
                   output spriteE, fontE, backgroundE, posE, attrE, visiE, //signals for vga instructions
                   output randomD, usezeroD, cnt_int, rti, audioD, 
-						output branch_stall_F, branch_stall_D, gunD, ldGunD, cnt_int_sel);  //signals for random, interrupts
+						output branch_stall_F, branch_stall_D, gunD, ldGunD, cnt_int_sel, cnt_int_disable);  //signals for random, interrupts
 
   wire       alu_or_mem_D, memwriteD, alusrcD, mainrw_, luiD, rtypeD,
              regdstD, rw_D, use_shifter, maindecregdstD, 
@@ -53,8 +53,9 @@ module controller(input        clk, reset,
   wire       memwriteE;
   wire       is_branch_or_jmp_F, is_branch_or_jmp_D;
   wire       posD, attrD, visiD, spriteD, fontD, backgroundD;
-  
+
   assign cnt_int_sel = cnt_int & functD[0];
+  assign cnt_int_disable = cnt_int & functD[1];
   assign  rw_D = mainrw_ | linkD ;
   assign  regdstD = maindecregdstD;
   assign  overflowableD = maindecoverflowableD | alu_shift_mdoverflowableD;

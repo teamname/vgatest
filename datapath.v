@@ -38,7 +38,7 @@ module datapath(input         clk, reset,
   output [4:0] audioVol, output [3:0] audioSel, output audioEn, input audioD, output is_nop,
   output stall_mem, input gunD, input ldGunD,
   input gun_data, input [7:0] controller_data, output cnt_int, output [3:0] PCD,
-  output int_en1, input cnt_int_sel);
+  output int_en1, input cnt_int_sel, cnt_int_disable);
 
 
   wire        forwardaD, forwardbD;
@@ -156,8 +156,8 @@ module datapath(input         clk, reset,
                           // outputs
                           write_data_M, readdata2M, byte_en_M);
 
-counter counter ( clk, reset, cnt_int_en & ~cnt_int_sel, cnt_val, cnt_int0);
-counter counter1 ( clk, reset, cnt_int_en & cnt_int_sel, cnt_val, cnt_int1);
+counter counter ( clk, reset, cnt_int_en & ~cnt_int_sel & ~cnt_int_disable, cnt_int_disable, cnt_val, cnt_int0);
+counter counter1 ( clk, reset, cnt_int_en & cnt_int_sel & ~cnt_int_disable, cnt_int_disable, cnt_val, cnt_int1);
 
   flip_flop_enable #(32) r1W(clk,  reset, ~stall_W, alu_out_M, aluoutW);
   flip_flop_enable #(32) r2W(clk,  reset, ~stall_W, readdata2M, readdataW);
