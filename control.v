@@ -1,5 +1,6 @@
 `timescale 1 ns / 1 ps
-module controller(input        clk, reset, 
+module controller(input        clk, reset,
+                  input  int_en1,
                   input        is_nop,
                   input  [5:0] opD, // opcode
                                functD, // function
@@ -33,7 +34,8 @@ module controller(input        clk, reset,
                   output [1:0] hilodisableE,
                   output       hiloaccessD, mdstartE, hilosrcE, 
                   output spriteE, fontE, backgroundE, posE, attrE, visiE, //signals for vga instructions
-                  output randomD, usezeroD, cnt_int, rti, audioD, branch_stall_F, branch_stall_D);  //signals for random, interrupts
+                  output randomD, usezeroD, cnt_int, rti, audioD, 
+						output branch_stall_F, branch_stall_D, gunD, ldGunD, cnt_int_sel);  //signals for random, interrupts
 
   wire       alu_or_mem_D, memwriteD, alusrcD, mainrw_, luiD, rtypeD,
              regdstD, rw_D, use_shifter, maindecregdstD, 
@@ -50,28 +52,29 @@ module controller(input        clk, reset,
   wire [2:0] alushcontmaindecD, alushcontrolD;
   wire       memwriteE;
   wire       is_branch_or_jmp_F, is_branch_or_jmp_D;
-  wire       posD, attrD, visiD;
+  wire       posD, attrD, visiD, spriteD, fontD, backgroundD;
   
-
+  assign cnt_int_sel = cnt_int & functD[0];
   assign  rw_D = mainrw_ | linkD ;
   assign  regdstD = maindecregdstD;
   assign  overflowableD = maindecoverflowableD | alu_shift_mdoverflowableD;
   assign  is_branch_or_jmp_F = is_branch | is_jump;
-  assign  branch_stall_F = ((is_branch & pc_src[1] &pc_src[0]) | is_jump)&(~stallD);
+  assign  branch_stall_F = ((is_branch & pc_src[1] &pc_src[0]) | is_jump | rti | int_en1)&(~stallD);
   assign  hiloaccessD = mdstartD | hiloreadD;
-  assign  posD = dummy & functD [2];
-  assign attrD = dummy & functD [1];
-  assign visiD = dummy & functD [0]; //used for sprites
-  assign usezeroD = randomD & functD [0];
+  assign  posD = (spriteD | fontD | backgroundD) & functD [2];
+  assign attrD = (spriteD | fontD | backgroundD) & functD [1];
+  assign visiD = (spriteD | fontD | backgroundD) & functD [0]; //used for sprites
+  assign usezeroD = (randomD & functD [0]) | gunD;
+  assign ldGunD = gunD & ~functD[0];
 
   maindec md(is_nop, opD, alu_or_mem_D, memwriteD, byteD, halfwordD, loadsignedD,
              alusrcD, maindecregdstD, mainrw_, is_unsigned_D, luiD,
              use_shifter, maindecoverflowableD, alushcontmaindecD,
              rtypeD,
              no_valid_op_D, dummy, adesableD, adelableD,spriteD, fontD, backgroundD,
-             randomD,  audioD, rti, cnt_int);
+             randomD,  audioD, rti, cnt_int, gunD);
 
-  
+  //assign alu_or_mem_D = rti ? 0 : alu_or_mem_;
   alu_shift_md  ad(dummy, functD, rtypeD, use_shifter, alushcontmaindecD, 
                useshifterD,
                alushcontrolD, alu_shift_mdoverflowableD,
@@ -85,7 +88,7 @@ module controller(input        clk, reset,
   branch_dec bd(opD, rtD, functD, is_jump, is_branch, ltD, gtD, eqD, brsrcD, linkD);
 
   
-  br_control  bc(reset, is_jump, is_branch, linkD, 
+  br_control  bc(int_en1, reset, is_jump , is_branch, linkD, 
                        aeqzD, aeqbD, agtzD, altzD, 
                        ltD, gtD, eqD, brsrcD, rd_src_D, pc_src, branch_src,
                        jmp_based_on_reg);
@@ -128,7 +131,7 @@ module maindec(input is_nop, input  [5:0] op,
                output       is_unsigned_D, lui, useshift, overflowable,
                output [2:0] alushcontrol, 
                output       rtype, no_valid_op_D, dummy,
-               output       adesableD, adelableD, spriteD, fontD, backgroundD, randomD, audioD, rti, cnt_int);
+               output       adesableD, adelableD, spriteD, fontD, backgroundD, randomD, audioD, rti, cnt_int, gunD);
 
   reg [19:0] controls;
  
@@ -145,12 +148,14 @@ module maindec(input is_nop, input  [5:0] op,
  assign fontD = op[1] & dummy;
  assign audioD = dummy & op[0] & op[2];
  assign randomD = (op[5:3] == 3'b111 && op[1:0] == 2'b11) ? 1'b1 : 1'b0;
- assign rti = op[5] & op[4] & ~op[3] & ~op[2] & ~op[1] & ~op[0]; //op: 110000 ret from interrupt
- assign cnt_int =  op[5] & op[4] & ~op[3] & ~op[2] & ~op[1] & op[0]; //op : 110001 counter interrupt
+ assign rti = op[5] & op[4] & !op[3] & !op[2] & !op[1] & !op[0]; //op: 110000 ret from interrupt
+ assign cnt_int =  op[5] & op[4] & !op[3] & !op[2] & !op[1] & op[0]; //op : 110001 counter interrupt
+ assign gunD =  op[5] & op[4] & op[3] & op[2] & op[1] & !op[0];
   always @ ( * )
     case(op)
       6'b000000: controls <= 20'b11000000001011000000; //R-type
       6'b110001: controls <= 20'b00000000001011000000; //counter interrupt
+      6'b110000: controls <= 20'b00000000000000000000; //rti
       6'b000001: controls <= 20'b01000000000100000000; //Opcode 1 (branches)
       6'b100000: controls <= 20'b10010110100100000000; //LB (assume big endian)
       6'b100001: controls <= 20'b10010101100100000100; //LH
@@ -179,6 +184,7 @@ module maindec(input is_nop, input  [5:0] op,
       6'b111100: controls <= 20'b00000000000000000010; //bkgnd
       6'b111011: controls <= 20'b10010000000100000000; //add random number gen 16bits (addiu)
       6'b111101: controls <= 20'b00000000000000000010; //audio
+      6'b111110: controls <= 20'b10010000000100000010; //load controller data
       default:   controls <= 20'bxxxxxxxxxxxxxxxxxxx1; //??? (exception)
     endcase
 endmodule

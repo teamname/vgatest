@@ -62,7 +62,6 @@ module flip_flop #(parameter WIDTH = 8)
                input      [WIDTH-1:0] d, 
                output reg [WIDTH-1:0] q);
 
-  reg [WIDTH-1:0] master;
 
   always @(posedge clk)
     q <= reset ? 0 : (clear ? 0 : d);
@@ -75,8 +74,6 @@ module flip_flop_enable_clear #(parameter WIDTH = 32)
                   input      [WIDTH-1:0] d, 
                   output reg [WIDTH-1:0] q);
  
-  reg [WIDTH-1:0] master;
-
   always @(posedge clk)
     q <= reset ? 0 : (clear ? 0 : (en ? d : q));
 
@@ -87,9 +84,7 @@ module flip_flop_enable #(parameter WIDTH = 32)
                  input                  en,
                  input      [WIDTH-1:0] d, 
                  output reg [WIDTH-1:0] q);
- 
-  reg [WIDTH-1:0] master;
-
+					  
   always @(posedge clk)
     q <= reset ? 0 : (en ? d : q);
 
@@ -101,7 +96,6 @@ module flip_flop_no_reset #(parameter WIDTH = 32)
                 input      [WIDTH-1:0] d, 
                 output reg [WIDTH-1:0] q);
  
-  reg [WIDTH-1:0] master;
 
   always @(posedge clk)
     q <= en ? d : q;
@@ -113,13 +107,10 @@ module flip_flop_reset #(parameter WIDTH = 32)
                input      [WIDTH-1:0] d, 
                output reg [WIDTH-1:0] q);
  
-  reg [WIDTH-1:0] master;
-
   always @(posedge clk)
     q <= reset ? 0 : d;
 
 endmodule
-
 
 module mux_2 #(parameter WIDTH = 32)
              (input  [WIDTH-1:0] d0, d1, 
@@ -128,6 +119,7 @@ module mux_2 #(parameter WIDTH = 32)
 
   assign  y = s ? d1 : d0; 
 endmodule
+
 
 module mux_3 #(parameter WIDTH = 32)
              (input  [WIDTH-1:0] d0, d1, d2,

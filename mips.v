@@ -14,8 +14,9 @@ module mips(input         clk, reset,
   output font_ch_active, font_clr, font_en,
   output [10:0] font_addr,
   output [3:0] font_data,
-  output [1:0] bck, input [3:0] interrupts,
-  output [4:0] audioVol, output [3:0] audioSel, output audioEn); 
+  output [1:0] bck, input [1:0] interrupts,
+  output [4:0] audioVol, output [3:0] audioSel, output audioEn,
+  output stall_mem,  input gun_data, input [7:0] controller_data, output cnt_into, output [3:0] PCD); 
 
   wire [5:0]  opcode_D, function_D;
   wire [4:0]  rs_D, rt_D, rd_E; // source & destination addresses
@@ -40,7 +41,7 @@ module mips(input         clk, reset,
               jump_D, // instruction is jump
               is_branch_or_jmp_E, // instruction is branch or jump
               no_valid_op_E, // the opcode is not valid
-              dummyE; // dummy signal to use maybe for interrupt
+              dummyE, int_en1; // dummy signal to use maybe for interrupt
   wire [2:0]  alu_cnt_E; // alu function control
   wire [1:0]  branch_src_D, // select source of branch
               alu_out_E, // select alu out
@@ -56,13 +57,13 @@ module mips(input         clk, reset,
               hilosrcE;
 
   wire        activeexception; //exception
-  wire cnt_int, rti;
+  wire rti;
   wire is_nop;
-  wire branch_stall_F, branch_stall_D;
+  wire branch_stall_F, branch_stall_D, cnt_int_sel;
   
    // controller
   controller cont(
-                 clk, reset,
+                 clk, reset,int_en1,
                  is_nop, 
               
                  opcode_D, function_D, rs_D, rt_D, 
@@ -83,7 +84,7 @@ module mips(input         clk, reset,
                  halfword_E,
                  hilodisableE,
                  hiloaccessD, md_start_E, hilosrcE, spriteE, fontE, backgroundE, posE, attrE, visiE, randomD, usezeroD, cnt_int, rti, audioD,
-                 branch_stall_F, branch_stall_D);
+                 branch_stall_F, branch_stall_D, gunD, ldgunD, cnt_int_sel);
 // data path
   datapath dp(
                 clk, reset, 
@@ -112,7 +113,8 @@ module mips(input         clk, reset,
                 sprite_attr, sprite_pos, sprite_vis, bck_ch_active,
                 font_ch_active, font_clr, font_en,
                 font_addr, font_data, bck,  cnt_int, rti, interrupts,
-                audioVol, audioSel, audioEn, audioD, is_nop);
+                audioVol, audioSel, audioEn, audioD, is_nop, stall_mem, gunD, ldgunD,
+					 gun_data, controller_data, cnt_into, PCD, int_en1, cnt_int_sel);
 
 endmodule
 

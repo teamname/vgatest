@@ -10,9 +10,9 @@ module dec(input         clk, reset,  unsignedD,
                    output [4:0]  rs_D, rt_D, rd_D,
                    output [31:0] src_a_D, src_b_D, sign_imm_D, next_br_D,
                    output        a_eq_b_D, a_eq_z_D, a_gt_z_D, a_lt_z_D,
-                   output [4:0] audioVol, output [3:0] audioSel, output audioEn);
+                   output [4:0] audioVol, output [3:0] audioSel, output audioEn, input gunD, input ldGunD, input gunIn, input [7:0] controllerIn);
 
-  wire [31:0] src_a_1, src_b_1, branch_target, src_a_prerand_D, sign_imm, random_imm_D;
+  wire [31:0] src_a_1, src_b_1, branch_target, src_a_prerand_D, sign_imm, random_imm_D, gun_imm_D, rand_gun_imm_D;
   wire [15:0] random;
   
   assign opcode_D = inst_D[31:26];  
@@ -21,6 +21,8 @@ module dec(input         clk, reset,  unsignedD,
   assign rt_D = inst_D[20:16];
   assign rd_D = inst_D[15:11];
   assign random_imm_D = {16'b0, random}; 
+  assign gun_imm_D = ldGunD ? {15'b0, gunIn} : {8'b0, controllerIn};
+  assign rand_gun_imm_D = gunD ? gun_imm_D : random_imm_D;
   
   //random number
   lfsr_counter randcnt (clk,reset,random);
@@ -34,9 +36,9 @@ module dec(input         clk, reset,  unsignedD,
   
   //sign extension and random number code
   extend_sign #(16,32) se(inst_D[15:0], ~unsignedD, sign_imm);
-  mux_2 #(32) random_immed_mux (sign_imm, random_imm_D, randomD, sign_imm_D); //use random or immediate?
+  mux_2 #(32) random_immed_mux (sign_imm, rand_gun_imm_D, randomD | gunD, sign_imm_D); //use random, gun, or immediate?
   mux_2 #(32) addtozero (src_a_prerand_D, 32'b0, usezeroD, src_a_D);  // branch address
-  assign branch_target = PC_plus_4_D + sign_imm_D-1; //{2'b00, sign_imm_D[29:0]}; was incorrect?
+  assign branch_target = PC_plus_4_D + sign_imm_D-1;
 
   // comparison flags
   compare_equal aeqbcmp(src_a_D, src_b_D, a_eq_b_D);

@@ -61,9 +61,9 @@ module background(clk, rst, pixel_x, pixel_y, pixel_r, pixel_g, pixel_b, change_
 		if(~rst) begin
 		    if(pixel_y < 239) 
 				if(pixel_x< 320) begin			
-					pixel_r = {tile_data[7:5], 5'b00000};
-					pixel_g = {tile_data[4:2], 5'b00000};
-					pixel_b = {tile_data[1:0], 6'b000000};
+					pixel_r = {tile_data[7:5], 5'b11111};
+					pixel_g = {tile_data[4:2], 5'b11111};
+					pixel_b = {tile_data[1:0], 6'b111111};
 		      end
 		end
 	 end

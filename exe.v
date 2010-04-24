@@ -29,7 +29,7 @@ module exe(input         clk,  reset, alu_src_E, dummyE, spriteE, fontE, backgro
 
  // mdunit md(clk, reset,
    //         src_a, src_b, alu_cnt_E, md_start_E, data_out, md_run_E);
-  assign pc_plus_8 = pc_E + 32'b1000;
+  assign pc_plus_8 = pc_E + 32'b1;
 
 
 
@@ -47,8 +47,8 @@ flip_flop_enable #(5) sp (clk, reset, spriteE, rd_E, sprite_sel);
 flip_flop_enable #(1) vis (clk, reset, spriteE, visiE, sprite_vis);
 flip_flop_enable #(11) fontAd (clk, reset, fontE, src_a[10:0], font_addr);
 flip_flop_enable #(4) fontDa (clk, reset, fontE, src_b[3:0], font_data);
-assign bck = (backgroundE) ? {posE,visiE} : 2'b0;
-assign bck_ch_active = (backgroundE) ? attrE : 1'b0;
+assign bck = (backgroundE) ? {attrE,visiE} : 2'b0;
+assign bck_ch_active = (backgroundE) ? posE : 1'b0;
 assign font_clr = 1'b0;
 endmodule
 

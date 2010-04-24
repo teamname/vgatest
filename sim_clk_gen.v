@@ -6,7 +6,12 @@ module sim_clk_gen(clk100buf, clk25);
     clk25 = 1'b0;
     forever begin
       #5 clk100buf = ~clk100buf;
-      #20 clk25 = ~clk25;
+     
     end
   end
+  
+  initial
+  forever
+   #20 clk25 = ~clk25;
+  
 endmodule

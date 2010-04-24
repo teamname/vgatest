@@ -19,9 +19,9 @@
 //
 //////////////////////////////////////////////////////////////////////////////////
 module vgamult(clk_100mhz, rst, clk_25mhz, blank, comp_sync, hsync, vsync, pixel_r, pixel_g, pixel_b, x, y, visable, load_pos, load_att, sprite_sel, 
-							bchange_active, background_sel, fchange_active, fwdata, fwaddr, fwenable);
+							bchange_active, background_sel, fchange_active, fwdata, fwaddr, fwenable, clk_rst);
     input clk_100mhz;
-    input rst, visable, load_pos, load_att, bchange_active, fchange_active, fwenable;
+    input rst, clk_rst, visable, load_pos, load_att, bchange_active, fchange_active, fwenable;
 	 input [1:0] background_sel;
 	 input [9:0] x;
 	 input [8:0] y;
@@ -40,13 +40,42 @@ module vgamult(clk_100mhz, rst, clk_25mhz, blank, comp_sync, hsync, vsync, pixel
 	 wire [8:0] pixel_x;
 	 wire [7:0] pixel_y;
 	 wire clkin_ibufg_out, clk_100mhz_buf, locked_dcm;
+	 reg [2:0] count, countf;
+	 
+	 always@(posedge clk_100mhz_buf)begin
+	  if(rst)
+	  count <= 3'h0;
+	  
+	  else if(count == 3'd4)
+		count <= 3'h1;
+		
+	 else if(bchange_active)
+		count <= count + 1;
+	  
+	  else
+	  count <= 3'h0;
+	  end
+	  
+	  always@(posedge clk_100mhz_buf)begin
+	  if(rst)
+	  countf <= 3'h0;
+	  
+	  else if(count == 3'd4)
+		countf <= 3'h1;
+		
+	 else if(fchange_active)
+		countf <= countf + 1;
+	  
+	  else
+	  countf <= 3'h0;
+	  end
 	 
 	 //assign locked_dcm = 1'b1;
 	 //sim_clk_gen clk(clk_100mhz_buf, clk_25mhz);
-	 vga_clk vga_clk_gen1(clk_100mhz, rst, clk_25mhz, clkin_ibufg_out, clk_100mhz_buf, locked_dcm);
+	 vga_clk vga_clk_gen1(clk_100mhz, clk_rst, clk_25mhz, clkin_ibufg_out, clk_100mhz_buf, locked_dcm);
 	 vga_logic  vgal1(.clk(clk_25mhz), .rst(rst | ~locked_dcm), .blank(blank), .comp_sync(comp_sync), .hsync(hsync), .vsync(vsync), .pixel_x(pixel_x), .pixel_y(pixel_y));
 	 main_logic main1(clk_100mhz_buf, rst | ~locked_dcm, pixel_x, pixel_y, pixel_r, pixel_g, pixel_b, x, y, visable, load_pos, load_att, sprite_sel, 
-							bchange_active, background_sel, fchange_active, fwdata, fwaddr, fwenable);
+							count[2], background_sel, countf[2], fwdata, fwaddr, fwenable);
 
 
 endmodule

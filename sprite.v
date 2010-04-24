@@ -80,8 +80,8 @@ module sprite(pixel_x, pixel_y, obj_on, pixel_r, pixel_g, pixel_b, load_pos, loa
 	assign inrange_x = ((current_x <= pixel_x) && (current_x + 6'd32 > pixel_x)) ? 1'b1 : 1'b0;
 	assign inrange_y = ((current_y <= pixel_y) && (current_y + 6'd32 > pixel_y)) ? 1'b1 : 1'b0;
 	
-	assign upper = v_flip ? 31 - pixel_y - current_y : pixel_y - current_y;
-	assign lower = h_flip ? 31 - pixel_x - current_x : pixel_x - current_x;
+	assign upper = v_flip ? ~(pixel_y - current_y) : pixel_y - current_y;
+	assign lower = h_flip ? ~(pixel_x - current_x) : pixel_x - current_x;
 	
 	always@(posedge clk) begin
 		if(rst) begin
