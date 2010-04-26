@@ -17,10 +17,10 @@ module fetch(input clk, reset,
   wire [3:0] reset_l, inter_rst;
   
   parameter RESET_ADDRESS = 32'h00000000;
-  parameter INTERRUPT_ADDRESS1 = 32'h00000009;
-  parameter INTERRUPT_ADDRESS2 = 32'h00000020;
-  parameter INTERRUPT_ADDRESS3 = 32'h00000020;
-  parameter INTERRUPT_ADDRESS4 = 32'h00000009;
+parameter IA1 = 32'h00000020;  //IO interrupt[0] 
+parameter IA2 = 32'h00000020; //IO interrupt[1] 
+parameter IA3 = 32'h00000009; //counter0
+parameter IA4 = 32'h00000009; //counter1
   parameter EXCEPTION_ADDRESS = 32'h00000100;
   
   assign int_en = (|interrupts) & sr &~stall & ~br_stall ;
@@ -30,10 +30,10 @@ mux_4 #(32) pcmux(RESET_ADDRESS, pcnextF2 ,
                     pc_plus_4, pc_branch, pc_sel, pcnextF1);
  
 
-  assign pcnextF2 = inter0 ? INTERRUPT_ADDRESS1 :
-                  (inter1 ? INTERRUPT_ADDRESS2 :
-                  (inter2 ? INTERRUPT_ADDRESS3 :
-                  INTERRUPT_ADDRESS4 ));
+  assign pcnextF2 = inter0 ? IA1 :
+                  (inter1 ? IA2 :
+                  (inter2 ? IA3 :
+                  IA4 ));
   
   assign pcnextF = rti ? ((epc > 2) ? epc-3  : 0) : pcnextF1;
                   

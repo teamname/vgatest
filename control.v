@@ -56,7 +56,7 @@ module controller(input        clk, reset,
 
   assign cnt_int_sel = cnt_int & functD[0];
   assign cnt_int_disable = cnt_int & functD[1];
-  assign  rw_D = mainrw_ | linkD ;
+  assign  rw_D = mainrw_ | (linkD & ((is_branch & pc_src[1] &pc_src[0]) | is_jump));
   assign  regdstD = maindecregdstD;
   assign  overflowableD = maindecoverflowableD | alu_shift_mdoverflowableD;
   assign  is_branch_or_jmp_F = is_branch | is_jump;

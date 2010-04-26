@@ -70,9 +70,9 @@ module vgamult(clk_100mhz, rst, clk_25mhz, blank, comp_sync, hsync, vsync, pixel
 	  countf <= 3'h0;
 	  end
 	 
-	 //assign locked_dcm = 1'b1;
-	 //sim_clk_gen clk(clk_100mhz_buf, clk_25mhz);
-	 vga_clk vga_clk_gen1(clk_100mhz, clk_rst, clk_25mhz, clkin_ibufg_out, clk_100mhz_buf, locked_dcm);
+	 assign locked_dcm = 1'b1;
+	 sim_clk_gen clk(clk_100mhz_buf, clk_25mhz);
+   //vga_clk vga_clk_gen1(clk_100mhz, clk_rst, clk_25mhz, clkin_ibufg_out, clk_100mhz_buf, locked_dcm);
 	 vga_logic  vgal1(.clk(clk_25mhz), .rst(rst | ~locked_dcm), .blank(blank), .comp_sync(comp_sync), .hsync(hsync), .vsync(vsync), .pixel_x(pixel_x), .pixel_y(pixel_y));
 	 main_logic main1(clk_100mhz_buf, rst | ~locked_dcm, pixel_x, pixel_y, pixel_r, pixel_g, pixel_b, x, y, visable, load_pos, load_att, sprite_sel, 
 							count[2], background_sel, countf[2], fwdata, fwaddr, fwenable);

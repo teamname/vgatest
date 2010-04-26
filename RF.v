@@ -9,14 +9,22 @@ module RF(input         clk, reset,
 integer k;
 
 initial begin
-  for(k = 0; k < 32; k = k+1)
-    regFile[k] <= 0;
+	for(k = 0; k < 32; k = k+1) begin
+		if(k != 29)
+   			regFile[k] <= 0;
+		else
+			regFile[k] <= 32'hffffffff;
+	end
   end
 
   always @(negedge clk) begin
    if(reset) begin
-	for(k = 0; k < 32; k = k+1) 
-    regFile[k] <= 0;
+		for(k = 0; k < 32; k = k+1) begin
+			if(k != 29)
+   				regFile[k] <= 0;
+			else
+				regFile[k] <= 32'hffffffff;
+	end
   end
 	else if (we) regFile[write_address] <= data;
 end

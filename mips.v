@@ -18,6 +18,11 @@ module mips(input         clk, reset,
   output [4:0] audioVol, output [3:0] audioSel, output audioEn,
   output stall_mem,  input gun_data, input [7:0] controller_data, output cnt_into, output [3:0] PCD); 
 
+parameter IA1 = 32'h00000020;  //IO interrupt[0] 
+parameter IA2 = 32'h00000020; //IO interrupt[1] 
+parameter IA3 = 32'h00000009; //counter0
+parameter IA4 = 32'h00000009; //counter1
+
   wire [5:0]  opcode_D, function_D;
   wire [4:0]  rs_D, rt_D, rd_E; // source & destination addresses
   wire        reg_dst_E, alu_src_E, // select reg destination and the second alu source
@@ -86,7 +91,7 @@ module mips(input         clk, reset,
                  hiloaccessD, md_start_E, hilosrcE, spriteE, fontE, backgroundE, posE, attrE, visiE, randomD, usezeroD, cnt_int, rti, audioD,
                  branch_stall_F, branch_stall_D, gunD, ldgunD, cnt_int_sel, cnt_int_disable);
 // data path
-  datapath dp(
+  datapath #(IA1, IA2, IA3, IA4) dp(
                 clk, reset, 
                 branch_stall_F, branch_stall_D,
                 dummyE, spriteE, fontE, backgroundE, posE, attrE, visiE, randomD, usezeroD,

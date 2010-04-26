@@ -1,7 +1,7 @@
 module duck_hunt_tb();
 
 reg rst, trig_in, lig_in, dat_in;
-duck_hunt top(.rst(rst), .trigger_in(trig_in), .light_in(lig_in), .data_in(dat_in));
+duck_hunt top(.rst(rst));//, .trigger_in(trig_in), .light_in(lig_in), .data_in(dat_in));
 
 
 initial begin

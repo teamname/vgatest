@@ -38,7 +38,7 @@ module dec(input         clk, reset,  unsignedD,
   extend_sign #(16,32) se(inst_D[15:0], ~unsignedD, sign_imm);
   mux_2 #(32) random_immed_mux (sign_imm, rand_gun_imm_D, randomD | gunD, sign_imm_D); //use random, gun, or immediate?
   mux_2 #(32) addtozero (src_a_prerand_D, 32'b0, usezeroD, src_a_D);  // branch address
-  assign branch_target = PC_plus_4_D + sign_imm_D-1;
+  assign branch_target = PC_plus_4_D + sign_imm_D - 2;
 
   // comparison flags
   compare_equal aeqbcmp(src_a_D, src_b_D, a_eq_b_D);

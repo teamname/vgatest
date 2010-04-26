@@ -10,9 +10,13 @@ module toplevelfinal(input clk, reset,
 input gun_data, input [7:0] controller_data, output cnt_int, output [3:0] PCD);
   
   parameter D_MEM = "data.txt";
-  parameter I_MEM = "guntest2.txt";
+  parameter I_MEM = "lightgtest.txt";
   parameter D_W = 8;
   parameter I_W = 10;
+  parameter IA1 = 32'h00000020;  //IO interrupt[0] assigned above
+parameter IA2 = 32'h00000020; //IO interrupt[1] assigned above
+parameter IA3 = 32'h00000009; //counter0
+parameter IA4 = 32'h00000009; //counter1
   wire [31:0] instr_addr;
   wire [31:0] mem_addr;
   wire [31:0] mem_data; 
@@ -22,7 +26,7 @@ input gun_data, input [7:0] controller_data, output cnt_int, output [3:0] PCD);
   wire [9:0] instr_addr_in;
   wire stallMem;  
 	 
-  mips proc (clk, reset, instr_addr, instr_data, wr_en, mem_addr, wr_data, mem_data, instr_ack, mem_ack,
+  mips #(IA1, IA2, IA3, IA4) proc (clk, reset, instr_addr, instr_data, wr_en, mem_addr, wr_data, mem_data, instr_ack, mem_ack,
   sprite_x,  sprite_y, sprite_sel,
    sprite_attr, sprite_pos, sprite_vis, bck_ch_active,
    font_ch_active, font_clr, font_en,
