@@ -16,12 +16,12 @@ module fetch(input clk, reset,
   wire int_en, inter0, inter1, inter2, inter3;
   wire [3:0] reset_l, inter_rst;
   
-  parameter RESET_ADDRESS = 32'h00000000;
-parameter IA1 = 32'h00000020;  //IO interrupt[0] 
-parameter IA2 = 32'h00000020; //IO interrupt[1] 
-parameter IA3 = 32'h00000009; //counter0
-parameter IA4 = 32'h00000009; //counter1
-  parameter EXCEPTION_ADDRESS = 32'h00000100;
+  localparam RESET_ADDRESS = 32'h00000000;
+parameter IA1 = 32'h00000018;  //IO interrupt[0] 
+parameter IA2 = 32'h0000002c; //IO interrupt[1] 
+parameter IA3 = 32'h0000001b; //counter0
+parameter IA4 = 32'h00000030; //counter1
+  localparam EXCEPTION_ADDRESS = 32'h00000100;
   
   assign int_en = (|interrupts) & sr &~stall & ~br_stall ;
   

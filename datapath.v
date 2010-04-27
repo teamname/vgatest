@@ -34,11 +34,11 @@ module datapath(input         clk, reset,
   output font_ch_active, font_clr, font_en,
   output [10:0] font_addr,
   output [3:0] font_data,
-  output [1:0] bck, input cnt_int_en, rti, input [1:0] interrupts,
+  output [1:0] bck, input cnt_int_enE, rti, input [1:0] interrupts,
   output [4:0] audioVol, output [3:0] audioSel, output audioEn, input audioD, output is_nop,
   output stall_mem, input gunD, input ldGunD,
   input gun_data, input [7:0] controller_data, output cnt_int0, output [3:0] PCD,
-  output int_en1, input cnt_int_sel, cnt_int_disable);
+  output int_en1, input cnt_int_selE, cnt_int_disableE);
   
 parameter IA1 = 32'h00000020;  //IO interrupt[0] 
 parameter IA2 = 32'h00000020; //IO interrupt[1] 
@@ -68,9 +68,9 @@ parameter IA4 = 32'h00000009; //counter1
   wire [4:0]  rdD;
   wire  sr;
   wire tmp, cnt_int1;
-  wire [31:0] cnt_val;
-  assign PCD = {cnt_int0, cnt_int1, 2'b0};
-  assign cnt_val = reset ?  32'hefffffff : srca2D;
+  wire [31:0] cnt_val, src_a_out;
+  assign PCD = {cnt_int0, cnt_int1, sr, 1'b0};
+  assign cnt_val = reset ?  32'hefffffff : src_a_out;
   assign stall_mem = stallF;
   assign activeexception = int_en1 | reset; 
   cnt_dp cnt_dp(
@@ -110,7 +110,7 @@ parameter IA4 = 32'h00000009; //counter1
 
   fetch #(IA1, IA2, IA3, IA4) fetch(
                         clk, reset, branch_stall_F, stallF, pc_sel_FD, pcnextbrFD,
-                        {cnt_int1, cnt_int0, interrupts}, rti,
+                        {cnt_int1, cnt_int0, interrupts[1:0]}, rti,
                         pc_F, pcplus4F, int_en1, sr);
 
   
@@ -147,7 +147,7 @@ parameter IA4 = 32'h00000009; //counter1
                             srcb2E, aluoutE, of_E, md_run_E, 
                             sprite_x, sprite_y, sprite_sel, sprite_attr, 
                             sprite_pos, sprite_vis, font_addr, font_data, font_en, bck, bck_ch_active, 
-                            font_ch_active, font_clr);
+                            font_ch_active, font_clr, src_a_out);
 
   
   flip_flop_enable_clear #(32) r1M(clk,  reset, ~stall_M, flush_M, srcb2E, writedataM);
@@ -160,8 +160,8 @@ parameter IA4 = 32'h00000009; //counter1
                           // outputs
                           write_data_M, readdata2M, byte_en_M);
 
-counter counter ( clk, reset, cnt_int_en & ~cnt_int_sel & ~cnt_int_disable, cnt_int_disable, cnt_val, cnt_int0);
-counter counter1 ( clk, reset, cnt_int_en & cnt_int_sel & ~cnt_int_disable, cnt_int_disable, cnt_val, cnt_int1);
+counter counter ( clk, reset, cnt_int_enE & ~cnt_int_selE & ~cnt_int_disableE, cnt_int_disableE, cnt_val, cnt_int0);
+counter counter1 ( clk, reset, cnt_int_enE & cnt_int_selE & ~cnt_int_disableE, cnt_int_disableE, cnt_val, cnt_int1);
 
   flip_flop_enable #(32) r1W(clk,  reset, ~stall_W, alu_out_M, aluoutW);
   flip_flop_enable #(32) r2W(clk,  reset, ~stall_W, readdata2M, readdataW);

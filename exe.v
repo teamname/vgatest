@@ -12,11 +12,12 @@ module exe(input         clk,  reset, alu_src_E, dummyE, spriteE, fontE, backgro
                     output [9:0] sprite_x, output [8:0] sprite_y,
                 output [4:0] sprite_sel, output sprite_attr, output sprite_pos, output sprite_vis,
                 output [10:0] font_addr, output[3:0] font_data, output font_en, 
-                output [1:0] bck, output bck_ch_active, font_ch_active, font_clr);
+                output [1:0] bck, output bck_ch_active, font_ch_active, font_clr, 
+					 output [31:0] src_a);
 
-  wire [31:0] src_a, src_b;
+  wire [31:0] src_b;
   wire [31:0] alu_out, shift_out, pc_plus_8, data_out;
-  wire [1:0] bckin;
+  
   mux_3 #(32)  forward_a_Emux(src_a_E, data_in, alu_out_M, forward_a_E, src_a);
   mux_3 #(32)  forward_b_Emux(src_b_E, data_in, alu_out_M, forward_b_E, src_b_out_E);
 
@@ -47,12 +48,8 @@ flip_flop_enable #(5) sp (clk, reset, spriteE, rd_E, sprite_sel);
 flip_flop_enable #(1) vis (clk, reset, spriteE, visiE, sprite_vis);
 flip_flop_enable #(11) fontAd (clk, reset, fontE, src_a[10:0], font_addr);
 flip_flop_enable #(4) fontDa (clk, reset, fontE, src_b[3:0], font_data);
-
-
-flip_flop_reset #(2) bckdat (clk, reset, bckin, bck);
-flip_flop_reset #(1) bckch (clk, reset, bck_ch_active_in, bck_ch_active);
-assign bckin = (backgroundE) ? {attrE,visiE} : 2'b0;
-assign bck_ch_active_in = (backgroundE) ? posE : 1'b0;
+assign bck = (backgroundE) ? {attrE,visiE} : 2'b0;
+assign bck_ch_active = (backgroundE) ? posE : 1'b0;
 assign font_clr = 1'b0;
 endmodule
 

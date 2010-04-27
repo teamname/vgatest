@@ -34,8 +34,8 @@ module controller(input        clk, reset,
                   output [1:0] hilodisableE,
                   output       hiloaccessD, mdstartE, hilosrcE, 
                   output spriteE, fontE, backgroundE, posE, attrE, visiE, //signals for vga instructions
-                  output randomD, usezeroD, cnt_int, rti, audioD, 
-						output branch_stall_F, branch_stall_D, gunD, ldGunD, cnt_int_sel, cnt_int_disable);  //signals for random, interrupts
+                  output randomD, usezeroD, cnt_intE, rti, audioD, 
+						output branch_stall_F, branch_stall_D, gunD, ldGunD, cnt_int_selE, cnt_int_disableE);  //signals for random, interrupts
 
   wire       alu_or_mem_D, memwriteD, alusrcD, mainrw_, luiD, rtypeD,
              regdstD, rw_D, use_shifter, maindecregdstD, 
@@ -46,7 +46,7 @@ module controller(input        clk, reset,
              adesableD, adelableD, 
              mdstartD, hilosrcD,
              hiloreadD, hiloselD;
-  wire       byteD, halfwordD, byteE;
+  wire       byteD, halfwordD, byteE, cnt_intD;
   wire [1:0] hilodisablealushD, hilodisablealushE, aluoutsrcD;
   wire       ltD, gtD, eqD, brsrcD;
   wire [2:0] alushcontmaindecD, alushcontrolD;
@@ -54,8 +54,8 @@ module controller(input        clk, reset,
   wire       is_branch_or_jmp_F, is_branch_or_jmp_D;
   wire       posD, attrD, visiD, spriteD, fontD, backgroundD;
 
-  assign cnt_int_sel = cnt_int & functD[0];
-  assign cnt_int_disable = cnt_int & functD[1];
+  assign cnt_int_selD = cnt_intD & functD[0];
+  assign cnt_int_disableD = cnt_intD & functD[1];
   assign  rw_D = mainrw_ | (linkD & ((is_branch & pc_src[1] &pc_src[0]) | is_jump));
   assign  regdstD = maindecregdstD;
   assign  overflowableD = maindecoverflowableD | alu_shift_mdoverflowableD;
@@ -73,7 +73,7 @@ module controller(input        clk, reset,
              use_shifter, maindecoverflowableD, alushcontmaindecD,
              rtypeD,
              no_valid_op_D, dummy, adesableD, adelableD,spriteD, fontD, backgroundD,
-             randomD,  audioD, rti, cnt_int, gunD);
+             randomD,  audioD, rti, cnt_intD, gunD);
 
   //assign alu_or_mem_D = rti ? 0 : alu_or_mem_;
   alu_shift_md  ad(dummy, functD, rtypeD, use_shifter, alushcontmaindecD, 
@@ -102,19 +102,21 @@ module controller(input        clk, reset,
   flip_flop_enable #(2) regD(clk, reset, ~stallD, {is_branch_or_jmp_F,branch_stall_F}, {is_branch_or_jmp_D,branch_stall_D});
 
   
-  flip_flop_enable_clear #(36) regE(clk, reset, ~stallE, flushE,
+  flip_flop_enable_clear #(39) regE(clk, reset, ~stallE, flushE,
                   {alu_or_mem_D, memwriteD, alusrcD, regdstD, rw_D, 
                   aluoutsrcD, alushcontrolD, loadsignedD, luiD,
                   byteD, halfwordD, overflowableD, is_branch_or_jmp_D,
                   no_valid_op_D, dummy,
                   adesableD, adelableD, 
-                  mdstartD, hilosrcD, hiloselD, hilodisablealushD, spriteD, fontD, backgroundD,posD, attrD, visiD}, 
+                  mdstartD, hilosrcD, hiloselD, hilodisablealushD, spriteD, fontD, backgroundD,posD, attrD, visiD,
+						cnt_intD, cnt_int_selD, cnt_int_disableD}, 
                   {alu_or_mem_E, memwriteE, alu_b_sel, regdstE, rw_E,  
                   alu_shift_md_sel, alu_cnt_E, loadsignedE, luiE, 
                   byteE, halfwordE, of_e, is_branch_or_jmp_E,
                   no_valid_op_E, dummy_E,
                   adesableE, adelableE, 
-                  mdstartE, hilosrcE, hiloselE, hilodisablealushE, spriteE, fontE, backgroundE, posE, attrE, visiE});
+                  mdstartE, hilosrcE, hiloselE, hilodisablealushE, spriteE, fontE, backgroundE, posE, attrE, visiE,
+						cnt_intE, cnt_int_selE, cnt_int_disableE});
   flip_flop_enable_clear #(6) regM(clk, reset, ~stallM, flushM,
                   {alu_or_mem_E, memwriteE, rw_E, loadsignedE,
                   byteE, halfwordE},
@@ -132,7 +134,7 @@ module maindec(input is_nop, input  [5:0] op,
                output       is_unsigned_D, lui, useshift, overflowable,
                output [2:0] alushcontrol, 
                output       rtype, no_valid_op_D, dummy,
-               output       adesableD, adelableD, spriteD, fontD, backgroundD, randomD, audioD, rti, cnt_int, gunD);
+               output       adesableD, adelableD, spriteD, fontD, backgroundD, randomD, audioD, rti, cnt_intD, gunD);
 
   reg [19:0] controls;
  
@@ -150,7 +152,7 @@ module maindec(input is_nop, input  [5:0] op,
  assign audioD = dummy & op[0] & op[2];
  assign randomD = (op[5:3] == 3'b111 && op[1:0] == 2'b11) ? 1'b1 : 1'b0;
  assign rti = op[5] & op[4] & !op[3] & !op[2] & !op[1] & !op[0]; //op: 110000 ret from interrupt
- assign cnt_int =  op[5] & op[4] & !op[3] & !op[2] & !op[1] & op[0]; //op : 110001 counter interrupt
+ assign cnt_intD =  op[5] & op[4] & !op[3] & !op[2] & !op[1] & op[0]; //op : 110001 counter interrupt
  assign gunD =  op[5] & op[4] & op[3] & op[2] & op[1] & !op[0];
   always @ ( * )
     case(op)
