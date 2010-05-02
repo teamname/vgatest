@@ -102,7 +102,7 @@ module controller(input        clk, reset,
   flip_flop_enable #(2) regD(clk, reset, ~stallD, {is_branch_or_jmp_F,branch_stall_F}, {is_branch_or_jmp_D,branch_stall_D});
 
   
-  flip_flop_enable_clear #(39) regE(clk, reset, ~stallE, flushE | int_en1,
+  flip_flop_enable_clear #(39) regE(clk, reset, ~stallE, flushE ,
                   {alu_or_mem_D, memwriteD, alusrcD, regdstD, rw_D, 
                   aluoutsrcD, alushcontrolD, loadsignedD, luiD,
                   byteD, halfwordD, overflowableD, is_branch_or_jmp_D,

@@ -75,7 +75,7 @@ parameter IA4 = 32'h00000009; //counter1
   wire [3:0] interrupt_taken;
   assign PCD = {cnt_int0, cnt_int1, sr, 1'b0};
   assign cnt_val = reset ?  32'hefffffff : src_a_out;
-  assign stall_mem = stallF & ~int_en1;
+  assign stall_mem = stallF;
   assign activeexception = 1'b0; 
   assign inst_F = inst_in;
   
@@ -115,13 +115,13 @@ parameter IA4 = 32'h00000009; //counter1
 
 
   fetch #(.IA1(IA1), .IA2(IA2), .IA3(IA3), .IA4(IA4)) fetch(
-                        clk, reset, pcD, branch_stall_F, stallF, pc_sel_FD, pcnextbrFD,
+                        clk, reset, pcD, branch_stall_F | branch_stall_D, stallF, pc_sel_FD, pcnextbrFD,
                         {cnt_int1, cnt_int0, interrupts[1:0]}, rti,
                         pc_F, pcplus4F, int_en1, sr, interrupt_taken);
 
   
   flip_flop_enable #(33) r1D(clk,  reset, ~stall_D, {pc_F,int_en1}, {pcD,int_en2});
-  flip_flop_enable_clear #(32) r2D(clk,  reset, ~stall_D, flushD | branch_stall_F | branch_stall_D | int_en1 | int_en2, inst_F, instrD);
+  flip_flop_enable_clear #(32) r2D(clk,  reset, ~stall_D, flushD | branch_stall_F | branch_stall_D | int_en1 | int_en2 , inst_F, instrD);
 
   flip_flop_enable #(32) r4D(clk,  reset, ~stall_D, pcplus4F, pcplus4D);
   assign tmp = |instrD;

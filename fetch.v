@@ -38,14 +38,14 @@ mux_4 #(32) pcmux(32'h00000000, 32'h00000000 ,
                   (inter1 ? IA2 :
                   (inter2 ? IA3 :
                   IA4 ))) : pcnextF1;
-  assign epc_in = (int_en & br_stall) ? pcnextF1 : pc;
+  assign epc_in = (int_en1 & pc_sel[1] & pc_sel[0]) ? pcnextF1 : pc_D;
   assign epc_en = int_en1 ? 1'b1:int_en;
   
   assign pcnextF =  rti ? epc : pcnextF2;
                   
   flip_flop_enable #(32) PC(clk,reset, ~stall , pcnextF, pc);
   
-  flip_flop_enable #(32) EPC(clk,reset, int_en1 , pc_D, epc);
+  flip_flop_enable #(32) EPC(clk,reset, int_en1 , epc_in, epc);
   
   assign intrst_en = (int_en1) ? 1'b1 : 1'b0;
   //stores what interrupt we are handling
@@ -59,7 +59,7 @@ mux_4 #(32) pcmux(32'h00000000, 32'h00000000 ,
   flip_flop_enable_clear #(1) int2(clk, reset, interrupts[2], reset_l[2], 1'b1, inter2);
   flip_flop_enable_clear #(1) int3(clk, reset, interrupts[3], reset_l[3], 1'b1, inter3);
   
-  assign int_en1 = (inter0 | inter1 | inter2 | inter3) & sr & ~stall;
+  assign int_en1 = (inter0 | inter1 | inter2 | inter3) & sr & ~stall & ~br_stall;
    
   always@ (posedge clk) begin
     if(reset | rti) begin
