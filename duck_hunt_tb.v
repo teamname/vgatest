@@ -1,3 +1,4 @@
+`timescale 1 ns / 1 ps
 module duck_hunt_tb();
 
 reg rst, trig_in, lig_in, dat_in;
@@ -9,7 +10,7 @@ initial begin
   dat_in = 0;
   lig_in = 1;
   trig_in = 1;
-  #110 rst = 1'b0;
+  #60 rst = 1'b0;
 end
 
 initial begin

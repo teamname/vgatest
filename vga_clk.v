@@ -7,7 +7,7 @@
 // \   \   \/     Version : 10.1.03
 //  \   \         Application : xaw2verilog
 //  /   /         Filename : vga_clk.v
-// /___/   /\     Timestamp : 04/26/2010 16:10:32
+// /___/   /\     Timestamp : 05/02/2010 01:04:12
 // \   \  /  \ 
 //  \___\/\___\ 
 //

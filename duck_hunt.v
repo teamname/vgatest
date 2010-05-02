@@ -67,15 +67,15 @@ vgamult vga(clk_100mhz, rst, clk_25mhz, blank, comp_sync, hsync, vsync, pixel_r,
 				sprite_pos, sprite_attr, sprite_sel, bck_ch_active, bck_sel,
 				font_ch_active, font_data, font_addr, font_en, clk_rst);
 
-assign interrupts = {2'b0};
+assign interrupts = {2'b00};
 parameter D_MEM = "data.txt";
-parameter I_MEM = "hour.txt";
+parameter I_MEM = "timer.txt";
 parameter D_W = 9;
 parameter I_W = 11;
-parameter IA1 = 32'h00000020;  //interrupts[0] 
-parameter IA2 = 32'h00000020; //interrupts[1] 
-parameter IA3 = 32'h0000001e; //counter0
-parameter IA4 = 32'h00000038; //counter1
+parameter IA1 = 32'h0000001c;  //interrupts[0] 
+parameter IA2 = 32'h0000001e; //interrupts[1] 
+parameter IA3 = 32'h00000010; //counter0
+parameter IA4 = 32'h00000012; //counter1
 		
 toplevelfinal #(D_MEM, I_MEM, D_W, I_W, IA1, IA2, IA3, IA4) proc(clk_25mhz, rst, sprite_x, sprite_y, sprite_sel, sprite_attr, sprite_pos, sprite_vis, bck_ch_active,	
 font_ch_active, font_clr, font_en, font_addr, font_data, 
@@ -105,13 +105,7 @@ always @ (posedge clk_25mhz) begin
  else if (pc[2]) c1 <= ~c1;
  else c1 <= c1;
 end
-/*
 
-always @ (posedge clk_25mhz) begin
- if (rst) int_en <= 1;
- else if (cnt_int) int_en <= ~int_en;
- else int_en <= int_en;
-end
 
 reg [30:0] counts;
 always @ (posedge clk_25mhz) begin
@@ -119,8 +113,8 @@ always @ (posedge clk_25mhz) begin
  else counts <= counts+1;
 end
 
-assign int_out_g = (counts == 25000000) ? 1 : 0;
-assign int_out_c = (counts == 30000000) ? 1 : 0;*/
+assign int_out_g = (counts == 40) ? 1 : 0;
+assign int_out_c = (counts == 107) ? 1 : 0;
 
 //g_control gun(clk_25mhz, rst, trigger_in, light_in, int_out_g, gun_data);
 //c_control con(clk_25mhz, rst, data_in, latch_out, clk_out, controller_data, int_out_c);

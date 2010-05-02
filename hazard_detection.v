@@ -12,7 +12,7 @@ module hazard_detection(input            clk, reset,
 
               output           stallF, stallD, stallE, stallM, stallW, 
               output           flushD, flushE, flushM, 
-				  input				 activeexception);
+				  input				 activeexception, 	input int_en1);
 
   wire lwstallD, branchstallD, instrmissF, datamissM, multdivDE;
 
@@ -53,7 +53,7 @@ module hazard_detection(input            clk, reset,
   //assign  activeexception =  1'b0;
 
   assign  stallD = lwstallD | branchstallD | datamissM | multdivDE
-                     | instrmissF; 
+                     | instrmissF ; 
 
   assign  stallF =  stallD ;     
 
@@ -64,11 +64,11 @@ module hazard_detection(input            clk, reset,
   assign  {stallM, stallW} = {2{datamissM}};
 
   
-  assign  flushD = 1'b0;  
+  assign  flushD = activeexception;  
 
   
   assign  flushE =    (~datamissM & stallD & ~memstallexception)
-                      | activeexception;
+                     |activeexception;
  
   
   assign  flushM = (~stallM & memstallexception)| activeexception;

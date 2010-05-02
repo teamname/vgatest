@@ -24,7 +24,7 @@ module br_control(input             int_en1, reset, jump, branch,
                         ~reset & (jump 
                         | (branch & ((src & abcompare) | (~src & azcompare))))};
 
-assign pc1 = int_en1 ? 2'b01: pc_sel;
+assign pc1 = int_en1 ? pc_sel: pc_sel;
   // branch_sel
   // 2'b00 branch to pc+4 + offset
   // 2'b01 jump to register value

@@ -2,7 +2,7 @@
 module datapath(input         clk, reset, 
                 input         branch_stall_F, branch_stall_D,
                 input         dummyE, spriteE, fontE, backgroundE,posE, attrE, visiE, randomD, usezeroD,
-                input  [31:0] inst_F, read_data_M, 
+                input  [31:0] inst_in, read_data_M, 
                 input         inst_mem_ack, data_mem_ack, 
                 input         mem_or_alu_sel_E, mem_or_alu_sel_M, mem_or_alu_sel_W, 
                 input         byte_repeat_M, halfword_repeat_M,
@@ -38,7 +38,7 @@ module datapath(input         clk, reset,
   output [4:0] audioVol, output [3:0] audioSel, output audioEn, input audioD, output is_nop,
   output stall_mem, input gunD, input ldGunD,
   input gun_data, input [7:0] controller_data, output cnt_int0, output [3:0] PCD,
-  output int_en1, input cnt_int_selE, cnt_int_disableE);
+  output int_en1, input cnt_int_selE, cnt_int_disableE, input whatintD);
   
 parameter IA1 = 32'h00000020;  //IO interrupt[0] 
 parameter IA2 = 32'h00000020; //IO interrupt[1] 
@@ -57,9 +57,12 @@ parameter IA4 = 32'h00000009; //counter1
   wire [31:0] srca2D, srcaE;
   wire [31:0] srcb2D, srcbE, srcb2E;
   wire [31:0] instrD;
+  wire int_en2;
+
+  
   wire [31:0] aluoutE, aluoutW;
   wire [31:0] readdataW, resultW;
-  wire [31:0] pcD;
+  wire [31:0] pcD, inst_F;
  
   wire        rsonD, rtonD, rsonE, rtonE;
   wire        rseqwrDM, rteqwrDM, rseqwrEM, rseqwrEW;
@@ -69,10 +72,13 @@ parameter IA4 = 32'h00000009; //counter1
   wire  sr;
   wire tmp, cnt_int1;
   wire [31:0] cnt_val, src_a_out;
+  wire [3:0] interrupt_taken;
   assign PCD = {cnt_int0, cnt_int1, sr, 1'b0};
   assign cnt_val = reset ?  32'hefffffff : src_a_out;
-  assign stall_mem = stallF;
-  assign activeexception = int_en1 | reset; 
+  assign stall_mem = stallF & ~int_en1;
+  assign activeexception = 1'b0; 
+  assign inst_F = inst_in;
+  
   cnt_dp cnt_dp(
                       clk, reset,
                       stall_E, stall_M, stall_W, flush_E, flush_M,
@@ -105,17 +111,17 @@ parameter IA4 = 32'h00000009; //counter1
               mem_or_alu_sel_E, mem_or_alu_sel_M, branch_D, jump_reg_D,
               inst_mem_ack, data_mem_ack, hiloaccessD, md_run_E,
               stallF, stall_D, stall_E, stall_M, stall_W, flushD, flush_E, flush_M,
-              activeexception);
+              activeexception, int_en1);
 
 
-  fetch #(IA1, IA2, IA3, IA4) fetch(
-                        clk, reset, branch_stall_F, stallF, pc_sel_FD, pcnextbrFD,
+  fetch #(.IA1(IA1), .IA2(IA2), .IA3(IA3), .IA4(IA4)) fetch(
+                        clk, reset, pcD, branch_stall_F, stallF, pc_sel_FD, pcnextbrFD,
                         {cnt_int1, cnt_int0, interrupts[1:0]}, rti,
-                        pc_F, pcplus4F, int_en1, sr);
+                        pc_F, pcplus4F, int_en1, sr, interrupt_taken);
 
   
-  flip_flop_enable #(32) r1D(clk,  reset, ~stall_D, pc_F, pcD);
-  flip_flop_enable_clear #(32) r2D(clk,  reset, ~stall_D, flushD | branch_stall_F | branch_stall_D, inst_F, instrD);
+  flip_flop_enable #(33) r1D(clk,  reset, ~stall_D, {pc_F,int_en1}, {pcD,int_en2});
+  flip_flop_enable_clear #(32) r2D(clk,  reset, ~stall_D, flushD | branch_stall_F | branch_stall_D | int_en1 | int_en2, inst_F, instrD);
 
   flip_flop_enable #(32) r4D(clk,  reset, ~stall_D, pcplus4F, pcplus4D);
   assign tmp = |instrD;
@@ -128,7 +134,7 @@ parameter IA4 = 32'h00000009; //counter1
                           opcode_D, function_D, rs_D, rt_D, rdD,
                           srca2D, srcb2D, signimmD, pcnextbrFD,
                           a_eq_b_D, a_eq_z_D, a_gt_z_D, a_lt_z_D, audioVol, audioSel, audioEn,
-                          gunD, ldGunD, gun_data, controller_data);
+                          gunD, ldGunD, gun_data, controller_data, whatintD, interrupt_taken);
 
   
   flip_flop_enable_clear #(32) r1E(clk,  reset, ~stall_E, flush_E, srca2D, srcaE); 

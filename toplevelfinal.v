@@ -10,7 +10,7 @@ module toplevelfinal(input clk, reset,
 input gun_data, input [7:0] controller_data, output cnt_int, output [3:0] PCD);
   
   parameter D_MEM = "data.txt";
-  parameter I_MEM = "instruction2";
+  parameter I_MEM = "hour.txt";
   parameter D_W = 8;
   parameter I_W = 10;
   parameter IA1 = 32'h00000020;  //IO interrupt[0] assigned above

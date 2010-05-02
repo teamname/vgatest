@@ -46,7 +46,7 @@ parameter IA4 = 32'h00000009; //counter1
               jump_D, // instruction is jump
               is_branch_or_jmp_E, // instruction is branch or jump
               no_valid_op_E, // the opcode is not valid
-              dummyE, int_en1; // dummy signal to use maybe for interrupt
+              dummyE, int_en2; // dummy signal to use maybe for interrupt
   wire [2:0]  alu_cnt_E; // alu function control
   wire [1:0]  branch_src_D, // select source of branch
               alu_out_E, // select alu out
@@ -68,7 +68,7 @@ parameter IA4 = 32'h00000009; //counter1
   
    // controller
   controller cont(
-                 clk, reset,int_en1,
+                 clk, reset,int_en2,
                  is_nop, 
               
                  opcode_D, function_D, rs_D, rt_D, 
@@ -89,7 +89,7 @@ parameter IA4 = 32'h00000009; //counter1
                  halfword_E,
                  hilodisableE,
                  hiloaccessD, md_start_E, hilosrcE, spriteE, fontE, backgroundE, posE, attrE, visiE, randomD, usezeroD, cnt_int, rti, audioD,
-                 branch_stall_F, branch_stall_D, gunD, ldgunD, cnt_int_sel, cnt_int_disable);
+                 branch_stall_F, branch_stall_D, gunD, ldgunD, cnt_int_sel, cnt_int_disable, whatintD);
 // data path
   datapath #(IA1, IA2, IA3, IA4) dp(
                 clk, reset, 
@@ -119,7 +119,7 @@ parameter IA4 = 32'h00000009; //counter1
                 font_ch_active, font_clr, font_en,
                 font_addr, font_data, bck,  cnt_int, rti, interrupts,
                 audioVol, audioSel, audioEn, audioD, is_nop, stall_mem, gunD, ldgunD,
-					 gun_data, controller_data, cnt_into, PCD, int_en1, cnt_int_sel, cnt_int_disable);
+					 gun_data, controller_data, cnt_into, PCD, int_en2, cnt_int_sel, cnt_int_disable, whatintD);
 
 endmodule
 
